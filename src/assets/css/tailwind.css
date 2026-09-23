@@ -1,0 +1,108 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    font-family: 'Anek Latin', sans-serif;
+    background-color: #ffffff;
+    color: #333;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary text-white px-6 py-2 text-sm font-semibold uppercase tracking-wider hover:bg-opacity-90 transition-all duration-200;
+  }
+  .btn-outline {
+    @apply border border-primary text-primary px-6 py-2 text-sm font-semibold uppercase tracking-wider hover:bg-primary hover:text-white transition-all duration-200;
+  }
+  .section-title {
+    @apply text-2xl md:text-3xl font-bold;
+  }
+  .nav-link {
+    @apply text-white text-xs uppercase tracking-widest font-medium hover:text-primary transition-colors duration-200 relative;
+  }
+  .nav-link.active {
+    @apply text-primary;
+  }
+  .page-hero {
+    @apply relative min-h-[45vh] flex items-center justify-center overflow-hidden;
+  }
+}
+
+/* Swiper custom styles */
+.swiper-pagination-bullet {
+  background: #1c53a5 !important;
+  opacity: 0.5;
+}
+.swiper-pagination-bullet-active {
+  opacity: 1 !important;
+  background: #1c53a5 !important;
+}
+
+/* Moments swiper dots — 20px below slider */
+.moments-swiper .swiper-pagination {
+  position: relative !important;
+  margin-top: 20px !important;
+  bottom: auto !important;
+}
+.moments-swiper .swiper-pagination-bullet {
+  background: rgba(255, 255, 255) !important;
+  opacity: 1 !important;
+  width: 10px;
+  height: 10px;
+}
+.moments-swiper .swiper-pagination-bullet-active {
+  background: #00b2f4 !important;
+  width: 24px !important;
+  border-radius: 4px !important;
+}
+
+/* Testimonials swiper dots */
+.testimonials-swiper {
+  padding-bottom: 0 !important;
+}
+.testimonials-swiper .swiper-pagination {
+  position: relative !important;
+  margin-top: 20px !important;
+  bottom: auto !important;
+}
+.testimonials-swiper .swiper-wrapper {
+  align-items: stretch;
+}
+.testimonials-swiper .swiper-slide {
+  height: auto;
+}
+.testimonials-swiper .swiper-pagination-bullet {
+  background: #868686 !important;
+  opacity: 1 !important;
+  width: 10px;
+  height: 10px;
+}
+.testimonials-swiper .swiper-pagination-bullet-active {
+  background: #00b2f4 !important;
+  width: 24px !important;
+  border-radius: 4px !important;
+}
+
+/* Floating animation for stacked images */
+@keyframes floatY {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-14px); }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0d1b2e;
+}
+::-webkit-scrollbar-thumb {
+  background: #1c53a5;
+  border-radius: 3px;
+}
