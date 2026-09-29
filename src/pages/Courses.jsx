@@ -71,10 +71,10 @@ const Courses = () => {
             onCategoryChange={setActiveCategory}
           />
           <div key={activeCity + ":" + activeCategory} className="course-results-enter">
-            <p className="text-sm text-gray-500 mb-5" role="status" aria-live="polite">
+            <p className="sr-only" role="status" aria-live="polite">
               <span className="capitalize font-semibold text-dark-navy">{activeCity}</span>
-              {' ? '}{activeCategory === 'all' ? 'All Courses' : activeCategory === 'diamond' ? 'Diamond' : 'Colorstone'}
-              {' ? '}{courses.length} {courses.length === 1 ? 'course' : 'courses'}
+              {' - '}{activeCategory === 'all' ? 'All Courses' : activeCategory === 'diamond' ? 'Diamond' : 'Colorstone'}
+              {' - '}{courses.length} {courses.length === 1 ? 'course' : 'courses'}
             </p>
             <CoursesGrid courses={courses} />
           </div>
