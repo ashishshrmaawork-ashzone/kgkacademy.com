@@ -5,6 +5,9 @@ import { ChevronRight } from 'lucide-react';
 import { allCoursesFlat } from '@/data/courses';
 import useApiData from '@/hooks/useApiData';
 import { getCourses, mediaUrl, unwrapData } from '@/services/api';
+import { courseText } from '@/utils/courseText';
+import CourseImage from '@/components/courses/CourseImage';
+import CourseMeta from '@/components/courses/CourseMeta';
 
 const CourseDetail = () => {
   const { slug } = useParams();
@@ -18,7 +21,7 @@ const CourseDetail = () => {
     ...apiCourse,
     slug,
     image: mediaUrl(apiCourse.thumbnail || apiCourse.image),
-    intro: apiCourse.short_description || apiCourse.description || '',
+    intro: courseText(apiCourse.short_description) || courseText(apiCourse.description),
     duration: apiCourse.duration || apiCourse.course_duration || '',
     level: apiCourse.level || '',
   } : fallbackCourse;
@@ -41,16 +44,7 @@ const CourseDetail = () => {
             {course?.title || slug?.replace(/-/g, ' ').replace(/surat|jaipur/g, '').trim()}
           </h1>
           {course && (
-            <div className="flex justify-center gap-4 mt-4 flex-wrap">
-              <span className="text-white/60 text-xs flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary inline-block" />
-                {course.duration}
-              </span>
-              <span className="text-white/60 text-xs flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary inline-block" />
-                {course.level}
-              </span>
-            </div>
+<div className="flex justify-center mt-4 text-white/60"><CourseMeta duration={course.duration} level={course.level} /></div>
           )}
         </div>
       </section>
@@ -60,21 +54,21 @@ const CourseDetail = () => {
         <div className="container mx-auto px-4 max-w-4xl">
 
           {/* Course image */}
-          {course?.image && (
+          {course && (
             <div className="h-52 md:h-72 lg:h-80 rounded-lg overflow-hidden mb-8 md:mb-10">
-              <img src={course.image} alt={course.title}
+              <CourseImage src={course.image} title={course.title}
                 className="w-full h-full object-cover" />
             </div>
           )}
 
           <div className="prose prose-gray max-w-none">
             <p className="text-primary text-xs uppercase tracking-widest mb-2 font-semibold">Course Introduction</p>
-            <p className="text-gray-600 text-sm leading-relaxed mb-6">
+            <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line mb-6">
               {course?.intro || 'This comprehensive, industry-focused course is designed to provide complete knowledge and hands-on experience in the diamond and gemstone industry.'}
             </p>
 
             <h3 className="text-dark-navy font-bold text-base md:text-lg mb-3">What You Will Learn</h3>
-            <ul className="space-y-2 mb-6">
+            <ul className="list-none space-y-2 mb-6">
               {['Diamond identification and quality assessment', 'Grading using industry-standard 4C methodology', 'Practical use of professional grading equipment', 'Industry exposure and factory visits', 'Career placement guidance'].map((item, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm text-gray-600">
                   <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
@@ -84,7 +78,7 @@ const CourseDetail = () => {
             </ul>
 
             <h3 className="text-dark-navy font-bold text-base md:text-lg mb-3">Career Opportunities</h3>
-            <ul className="space-y-2 mb-8">
+            <ul className="list-none space-y-2 mb-8">
               {['Diamond Grader', 'Quality Control Specialist', 'Gemstone Identifier', 'Diamond Trader', 'Lab Technician'].map((item, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm text-gray-600">
                   <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />

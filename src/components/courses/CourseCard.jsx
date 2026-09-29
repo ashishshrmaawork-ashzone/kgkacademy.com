@@ -1,13 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
+import CourseImage from './CourseImage';
+import CourseMeta from './CourseMeta';
 
 const CourseCard = ({ course }) => (
   <div className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 hover:border-primary/30 group flex flex-col">
     <div className="h-44 md:h-40 overflow-hidden">
-      <img
+      <CourseImage
         src={course.image}
-        alt={course.title}
+        title={course.title}
         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
       />
     </div>
@@ -17,18 +19,11 @@ const CourseCard = ({ course }) => (
         {course.title}
       </h3>
       <p className="text-primary text-xs uppercase tracking-wider mb-2 font-semibold">Course Introduction</p>
-      <p className="text-gray-600 text-sm leading-relaxed line-clamp-3 mb-3">
-        {course.intro}
-      </p>
-      <div className="flex flex-wrap gap-3 text-xs text-gray-500">
-        <span className="flex items-center gap-1">
-          <span className="w-1.5 h-1.5 rounded-full bg-primary inline-block" />
-          {course.duration}
-        </span>
-        <span className="flex items-center gap-1">
-          <span className="w-1.5 h-1.5 rounded-full bg-primary inline-block" />
-          {course.level}
-        </span>
+      {course.intro && (
+        <p className="text-gray-600 text-sm leading-relaxed line-clamp-3 mb-3">{course.intro}</p>
+      )}
+      <div className="text-gray-500">
+        <CourseMeta duration={course.duration} level={course.level} />
       </div>
     </div>
 

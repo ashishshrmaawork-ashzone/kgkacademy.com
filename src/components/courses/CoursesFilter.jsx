@@ -13,10 +13,12 @@ const CoursesFilter = ({ activeCity, activeCategory, onCityChange, onCategoryCha
       {['surat', 'jaipur'].map(city => (
         <button
           key={city}
+          type="button"
+          aria-pressed={activeCity === city}
           onClick={() => onCityChange(city)}
           className={`px-6 md:px-10 py-2.5 text-sm font-semibold uppercase tracking-widest border transition-all duration-200 ${
             activeCity === city
-              ? 'bg-primary text-white border-primary'
+              ? 'bg-primary text-white border-primary shadow-md'
               : 'bg-white text-dark-navy border-gray-300 hover:border-primary hover:text-primary'
           }`}
         >
@@ -30,10 +32,12 @@ const CoursesFilter = ({ activeCity, activeCategory, onCityChange, onCategoryCha
       {CATEGORIES.map(cat => (
         <button
           key={cat.key}
+          type="button"
+          aria-pressed={activeCategory === cat.key}
           onClick={() => onCategoryChange(cat.key)}
           className={`px-4 md:px-6 py-2 text-xs font-semibold uppercase tracking-widest border transition-all duration-200 ${
             activeCategory === cat.key
-              ? 'bg-[#08254f] text-white border-[#08254f]'
+              ? 'bg-[#08254f] text-white border-[#08254f] shadow-md'
               : 'bg-white text-gray-500 border-gray-200 hover:border-[#08254f] hover:text-[#08254f]'
           }`}
         >

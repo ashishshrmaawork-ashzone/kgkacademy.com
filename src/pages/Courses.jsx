@@ -8,6 +8,7 @@ import CoursesGrid   from '@/components/courses/CoursesGrid';
 import { allCourses } from '@/data/courses';
 import useApiData from '@/hooks/useApiData';
 import { getCourses, mediaUrl, unwrapData } from '@/services/api';
+import { courseText } from '@/utils/courseText';
 
 const Courses = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -45,7 +46,7 @@ const Courses = () => {
     city: course.city || course.branch_name || activeCity,
     category: String(course.category || course.category_name || '').toLowerCase(),
     image: mediaUrl(course.thumbnail || course.image),
-    intro: course.short_description || course.description || '',
+    intro: courseText(course.short_description) || courseText(course.description),
     duration: course.duration || course.course_duration || '',
     level: course.level || '',
   }));
@@ -69,7 +70,14 @@ const Courses = () => {
             onCityChange={handleCityChange}
             onCategoryChange={setActiveCategory}
           />
-          <CoursesGrid courses={courses} />
+          <div key={activeCity + ":" + activeCategory} className="course-results-enter">
+            <p className="text-sm text-gray-500 mb-5" role="status" aria-live="polite">
+              <span className="capitalize font-semibold text-dark-navy">{activeCity}</span>
+              {' ? '}{activeCategory === 'all' ? 'All Courses' : activeCategory === 'diamond' ? 'Diamond' : 'Colorstone'}
+              {' ? '}{courses.length} {courses.length === 1 ? 'course' : 'courses'}
+            </p>
+            <CoursesGrid courses={courses} />
+          </div>
         </div>
       </section>
     </MainLayout>
