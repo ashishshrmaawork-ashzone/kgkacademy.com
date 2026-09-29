@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import MainLayout from '@/layout/MainLayout';
 import usePageMeta from '@/hooks/usePageMeta';
 import usePageContent from '@/hooks/usePageContent';
@@ -10,7 +11,21 @@ import KGKTimelineSection from '@/components/about/KGKTimelineSection';
 
 const AboutUs = () => {
   const content = usePageContent('about-us');
-  useEffect(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); }, []);
+  const { hash, key } = useLocation();
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      const section = hash ? document.getElementById(hash.slice(1)) : null;
+      const headerHeight = document.querySelector('header')?.getBoundingClientRect().height || 0;
+      const top = section
+        ? Math.max(0, section.getBoundingClientRect().top + window.scrollY - headerHeight - 12)
+        : 0;
+      window.scrollTo({
+        top,
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [hash, key]);
   usePageMeta('About Us', 'Learn about KGK Academy\'s story, vision, values, and the promotors behind India\'s premier diamond and gemstone training institute.');
   return (<MainLayout>
     <OurStorySection content={content.story} />

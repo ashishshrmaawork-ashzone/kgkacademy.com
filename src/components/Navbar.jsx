@@ -51,7 +51,7 @@ const Navbar = () => {
   useEffect(() => {
     setMobileOpen(false);
     setOpenDropdown(null);
-  }, [location.pathname]);
+  }, [location.pathname, location.search, location.hash, location.key]);
 
   useEffect(() => {
     const handleClick = (e) => {
