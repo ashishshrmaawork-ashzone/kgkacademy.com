@@ -13,7 +13,7 @@ const socialLinks = [
 
 const usefulLinks = [
   { label: 'About Us', to: '/about-us' },
-  { label: 'Blog', to: '/blog' },
+  // { label: 'Blog', to: '/blog' },
   { label: 'Contact Us', to: '/contact-us' },
   { label: 'Register', to: '/contact-us' },
   { label: 'Career', to: '/career-placement' },
