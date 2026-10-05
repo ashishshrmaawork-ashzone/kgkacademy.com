@@ -12,8 +12,9 @@ import useCmsPage from '@/hooks/useCmsPage';
 
 const Courses = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [activeCity, setActiveCity]         = useState(searchParams.get('city') || '');
   const [activeCategory, setActiveCategory] = useState('all');
+  const cityParam = searchParams.get('city')?.trim().toLowerCase();
+  const activeCity = cityParam === 'jaipur' ? 'jaipur' : 'surat';
   const { data: apiCourses, loading } = useApiData(
     () => getCourses('per_page=100').then(unwrapData),
     []
@@ -24,12 +25,8 @@ const Courses = () => {
   const listing = pageContent.course_listing || {};
 
   useEffect(() => {
-    const cityFromUrl = searchParams.get('city');
-    if (cityFromUrl) {
-      setActiveCity(cityFromUrl);
-      setActiveCategory('all');
-    }
-  }, [searchParams]);
+    setActiveCategory('all');
+  }, [activeCity]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -37,9 +34,21 @@ const Courses = () => {
   usePageMeta(pageMeta?.meta_title, pageMeta?.meta_description);
 
   const handleCityChange = (city) => {
-    setActiveCity(city);
     setActiveCategory('all');
-    setSearchParams({ city });
+    setSearchParams((currentParams) => {
+      const nextParams = new URLSearchParams(currentParams);
+      nextParams.set('city', city);
+      return nextParams;
+    });
+  };
+
+  const normalizeCategory = (category) => {
+    const normalized = String(category || '').toLowerCase().replace(/[^a-z]/g, '');
+    if (normalized.includes('diamond')) return 'diamond';
+    if (normalized.includes('colorstone') || normalized.includes('gemstone') || normalized.includes('jewellerydesign') || normalized.includes('jewelrydesign')) {
+      return 'colorstone';
+    }
+    return normalized;
   };
 
   const coursesFromApi = apiCourses.map((course) => ({
@@ -47,19 +56,15 @@ const Courses = () => {
     slug: course.slug || String(course.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-'),
     title: course.title,
     city: course.city || course.branch_name || '',
-    category: String(course.category || course.category_name || '').toLowerCase(),
+    category: normalizeCategory(course.category || course.category_name),
     image: mediaUrl(course.thumbnail || course.image),
     intro: courseText(course.short_description) || courseText(course.description),
     duration: course.duration || course.course_duration || '',
     level: course.level || '',
   }));
-  const cities = [...new Set(coursesFromApi.map(course => course.city).filter(Boolean))].sort();
-  const categories = [...new Set(coursesFromApi.map(course => course.category).filter(Boolean))]
-    .map(category => ({ key: category, label: category }))
-    .sort((a, b) => a.label.localeCompare(b.label));
-  const selectedCity = cities.includes(activeCity) ? activeCity : (cities[0] || '');
+  const selectedCity = activeCity === 'jaipur' ? 'Jaipur' : 'Surat';
   const courses = coursesFromApi.filter(course =>
-    (!selectedCity || !course.city || course.city === selectedCity) &&
+    (!course.city || String(course.city).toLowerCase().includes(activeCity)) &&
     (activeCategory === 'all' || course.category === activeCategory)
   );
 
@@ -70,13 +75,10 @@ const Courses = () => {
       <section className="bg-white py-8 md:py-10">
         <div className="container mx-auto px-4">
           <CoursesFilter
-            cities={cities}
-            categories={categories}
-            activeCity={selectedCity}
+            activeCity={activeCity}
             activeCategory={activeCategory}
             onCityChange={handleCityChange}
             onCategoryChange={setActiveCategory}
-            allLabel={listing.all_courses_label}
           />
           <div key={activeCity + ":" + activeCategory} className="course-results-enter">
             {loading ? <p className="text-center text-gray-500">{listing.loading_message || 'Loading courses...'}</p> : (
