@@ -1,5 +1,6 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { hasPendingApiRequests, subscribeToApiLoading } from './services/api';
 
 const Home = lazy(() => import('./pages/Home'));
 const AboutUs = lazy(() => import('./pages/AboutUs'));
@@ -17,7 +18,7 @@ const NotFound = lazy(() => import('./pages/NotFound'));
 
 function Loader() {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-dark-navy">
+    <div className="flex items-center justify-center min-h-screen bg-dark-navy" role="status" aria-live="polite">
       <div className="flex flex-col items-center gap-4">
         <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
         <p className="text-primary text-sm uppercase tracking-widest">Loading...</p>
@@ -27,6 +28,30 @@ function Loader() {
 }
 
 function App() {
+  const [isPageLoading, setIsPageLoading] = useState(
+    () => document.readyState !== 'complete' || hasPendingApiRequests()
+  );
+
+  useEffect(() => {
+    let documentLoaded = document.readyState === 'complete';
+    const updateLoadingState = () => {
+      setIsPageLoading(!documentLoaded || hasPendingApiRequests());
+    };
+    const handleWindowLoad = () => {
+      documentLoaded = true;
+      updateLoadingState();
+    };
+    const unsubscribeFromApiLoading = subscribeToApiLoading(updateLoadingState);
+
+    window.addEventListener('load', handleWindowLoad);
+    updateLoadingState();
+
+    return () => {
+      window.removeEventListener('load', handleWindowLoad);
+      unsubscribeFromApiLoading();
+    };
+  }, []);
+
   return (
     <Router>
       <Suspense fallback={<Loader />}>
@@ -46,6 +71,11 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
+      {isPageLoading && (
+        <div className="fixed inset-0 z-50">
+          <Loader />
+        </div>
+      )}
     </Router>
   );
 }
