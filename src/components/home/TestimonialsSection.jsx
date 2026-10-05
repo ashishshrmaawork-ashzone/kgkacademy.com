@@ -24,9 +24,11 @@ export default function TestimonialsSection() {
       img: mediaUrl(item.avatar),
       name: item.name,
       role: item.role,
-      stars: Number(item.rating || 5),
+      stars: Number(item.rating || 0),
       text: item.quote || '',
-    }));
+    })).filter(item => item.name || item.role || item.text || item.img);
+
+  if (!items.length && !testimonialContent.heading && !testimonialContent.background_image) return null;
 
   return (
     <section className="relative py-10 md:py-20 overflow-hidden">
@@ -41,13 +43,13 @@ export default function TestimonialsSection() {
             {testimonialContent.heading}
           </h2>
         )}
-        <Swiper
+        {items.length > 0 && <Swiper
           modules={[Autoplay, Pagination]}
           slidesPerView={1}
           spaceBetween={40}
-          loop={true}
-          autoplay={{ delay: 4000, disableOnInteraction: false }}
-          pagination={{ clickable: true }}
+          loop={items.length > 1}
+          autoplay={items.length > 1 ? { delay: 4000, disableOnInteraction: false } : false}
+          pagination={items.length > 1 ? { clickable: true } : false}
           breakpoints={{
             768:  { slidesPerView: 2 },
             1024: { slidesPerView: 3 },
@@ -70,13 +72,13 @@ export default function TestimonialsSection() {
                   )}
                   <Stars n={t.stars} />
                 </div>
-                <p className="font-bold text-white text-sm mb-0.5">{t.name}</p>
-                <p className="text-white/50 text-xs mb-3">{t.role}</p>
-                <p className="text-white/80 text-sm leading-relaxed flex-1">{t.text}</p>
+                {t.name && <p className="font-bold text-white text-sm mb-0.5">{t.name}</p>}
+                {t.role && <p className="text-white/50 text-xs mb-3">{t.role}</p>}
+                {t.text && <p className="text-white/80 text-sm leading-relaxed flex-1">{t.text}</p>}
               </div>
             </SwiperSlide>
           ))}
-        </Swiper>
+        </Swiper>}
       </div>
     </section>
   );

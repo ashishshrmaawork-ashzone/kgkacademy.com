@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import MainLayout from '@/layout/MainLayout';
 import usePageMeta from '@/hooks/usePageMeta';
-import usePageContent from '@/hooks/usePageContent';
+import useCmsPage from '@/hooks/useCmsPage';
 import { FaCalendarAlt, FaUser } from 'react-icons/fa';
 import useApiData from '@/hooks/useApiData';
 import { getBlogs, mediaUrl, unwrapData } from '@/services/api';
@@ -16,7 +16,7 @@ const categoryColors = {
 };
 
 const Blog = () => {
-  const content = usePageContent('blog');
+  const { page, content } = useCmsPage('blog');
   const listing = content.blog_listing || {};
   const initialItems = Number(listing.initial_items) || 0;
   const loadMoreCount = Number(listing.load_more_count) || 0;
@@ -41,7 +41,7 @@ const Blog = () => {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
-  usePageMeta('Blog', content.hero?.description || 'Explore expert articles on diamond grading, gemstone identification, jewellery design, and career guidance from KGK Academy.');
+  usePageMeta(page?.meta_title, page?.meta_description);
 
   return (
     <MainLayout>

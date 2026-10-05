@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/layout/MainLayout';
 import usePageMeta from '@/hooks/usePageMeta';
-import usePageContent from '@/hooks/usePageContent';
+import useCmsPage from '@/hooks/useCmsPage';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import useApiData from '@/hooks/useApiData';
 import { getFaqs, unwrapData } from '@/services/api';
@@ -36,7 +36,7 @@ const FaqItem = ({ q, a, defaultOpen = false }) => {
 
 const Faqs = () => {
   const [activeCategory, setActiveCategory] = useState('');
-  const content = usePageContent('faqs');
+  const { page, content } = useCmsPage('faqs');
   const listing = content.faq_listing || {};
   const { data: apiFaqs, loading } = useApiData(() => getFaqs().then(unwrapData), []);
   const dynamicCategories = apiFaqs.map((category) => category.name).filter(Boolean);
@@ -51,7 +51,7 @@ const Faqs = () => {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
-  usePageMeta('FAQs', content.hero?.description || 'Find answers to frequently asked questions about KGK Academy courses, admissions, fees, placement support, and more.');
+  usePageMeta(page?.meta_title, page?.meta_description);
 
   const dynamicCategory = apiFaqs.find((category) => category.name === activeCategory);
   const items = dynamicCategory

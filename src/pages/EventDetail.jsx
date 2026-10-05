@@ -190,17 +190,6 @@ const EventDetail = () => {
                 </div>
               </div>
 
-              {/* CTA Card */}
-              <div className="rounded-xl p-6 mb-6 border border-primary/20 bg-primary/5">
-                <h4 className="text-dark-navy font-bold text-base mb-2">Interested in Joining?</h4>
-                <p className="text-gray-600 text-sm mb-4">
-                  Be part of our next industry event or campus program.
-                </p>
-                <Link to="/contact-us" className="btn-primary w-full text-center block">
-                  Enquire Now
-                </Link>
-              </div>
-
               {/* Other Events */}
               {otherEvents.length > 0 && (
                 <div>

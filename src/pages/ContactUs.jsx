@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import MainLayout from '@/layout/MainLayout';
 import usePageMeta from '@/hooks/usePageMeta';
 import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaDownload, FaComments, FaBuilding } from 'react-icons/fa';
@@ -11,7 +11,7 @@ const ContactUs = () => {
     const second = Math.floor(Math.random() * 8) + 1;
     return { question: `${first} + ${second}`, answer: String(first + second) };
   };
-  const [activeMap, setActiveMap] = useState('surat');
+  const [activeMap, setActiveMap] = useState('');
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -27,12 +27,40 @@ const ContactUs = () => {
   const [captchaInput, setCaptchaInput] = useState('');
   const [mapReady, setMapReady] = useState(false);
   const mapSectionRef = useRef(null);
-  const { content } = useCmsPage('contact-us');
+  const { page, content } = useCmsPage('contact-us');
   const hero = content.hero || {};
   const formContent = content.contact_form || {};
-  const suratContent = content.surat_location || {};
-  const jaipurContent = content.jaipur_location || {};
   const quickLinksContent = content.quick_links || {};
+  const offices = useMemo(() => Object.keys(content)
+    .filter(key => /_location$/.test(key))
+    .map(key => {
+      const office = content[key] || {};
+      const id = key.replace(/_location$/, '');
+      return {
+        id,
+        title: office.tab_label,
+        address: office.address,
+        phone: office.phone,
+        email: office.email,
+        mapEmbed: office.map_url,
+      };
+    })
+    .filter(office => office.title || office.address || office.phone || office.email || office.mapEmbed), [content]);
+  const activeOffice = offices.find(office => office.id === activeMap) || offices[0];
+  const quickLinkIcons = [FaDownload, FaComments, FaBuilding];
+  const quickLinks = Object.keys(quickLinksContent)
+    .map(key => {
+      const match = key.match(/^link_(\d+)_label$/);
+      if (!match || !quickLinksContent[key]) return null;
+      const number = Number(match[1]);
+      return {
+        id: number,
+        label: quickLinksContent[key],
+        href: quickLinksContent[`link_${number}_url`],
+        Icon: quickLinkIcons[number - 1],
+      };
+    })
+    .filter(link => link && link.href);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -58,7 +86,13 @@ const ContactUs = () => {
 
     return () => observer.disconnect();
   }, []);
-  usePageMeta('Contact Us', 'Get in touch with KGK Academy in Surat or Jaipur. Enquire about diamond and gemstone courses, admissions, and placement support.');
+  usePageMeta(page?.meta_title, page?.meta_description);
+
+  useEffect(() => {
+    if (!offices.some(office => office.id === activeMap) && offices.length) {
+      setActiveMap(offices[0].id);
+    }
+  }, [activeMap, offices]);
 
   const handleChange = (e) => {
     const { name } = e.target;
@@ -107,29 +141,6 @@ const ContactUs = () => {
     }
   };
 
-  const offices = {
-    surat: {
-      title: suratContent.tab_label || 'Surat',
-      address: suratContent.address || 'KGK Academy, Diamond Bourse, Surat, Gujarat - 395002',
-      phone: suratContent.phone || '+91 9853 9853 36',
-      email: suratContent.email || 'kgk.academy@kgkmail.com',
-      mapEmbed: suratContent.map_url || 'https://maps.google.com/maps?q=Surat,Gujarat,India&t=&z=13&ie=UTF8&iwloc=&output=embed',
-    },
-    jaipur: {
-      title: jaipurContent.tab_label || 'Jaipur',
-      address: jaipurContent.address || 'KGK Academy, KGK Tower, Jaipur, Rajasthan - 302017',
-      phone: jaipurContent.phone || '+91 9853 9853 36',
-      email: jaipurContent.email || 'kgk.academy@kgkmail.com',
-      mapEmbed: jaipurContent.map_url || 'https://maps.google.com/maps?q=Jaipur,Rajasthan,India&t=&z=13&ie=UTF8&iwloc=&output=embed',
-    },
-  };
-
-  const quickLinks = [
-    { icon: FaDownload, label: quickLinksContent.link_1_label || 'Download Brochure', href: quickLinksContent.link_1_url || '#' },
-    { icon: FaComments, label: quickLinksContent.link_2_label || 'Speak to Counsellor', href: quickLinksContent.link_2_url || 'tel:+919853985336' },
-    { icon: FaBuilding, label: quickLinksContent.link_3_label || 'Visit Our Campus', href: quickLinksContent.link_3_url || '#' },
-  ];
-
   return (
     <MainLayout>
       {/* ── PAGE HERO ── */}
@@ -144,20 +155,20 @@ const ContactUs = () => {
           ))}
         </div>
         <div className="container-fluid relative z-10 text-center">
-          <p className="text-primary text-xs uppercase tracking-[0.3em] mb-3">{hero.eyebrow || 'Get In Touch'}</p>
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">{hero.heading || 'Contact us'}</h1>
-          <p className="text-white/60 text-sm">{hero.description || 'Do you have any questions? Please do not hesitate to contact us directly. Our team will get in touch with you.'}</p>
+          {hero.eyebrow && <p className="text-primary text-xs uppercase tracking-[0.3em] mb-3">{hero.eyebrow}</p>}
+          {hero.heading && <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">{hero.heading}</h1>}
+          {hero.description && <p className="text-white/60 text-sm">{hero.description}</p>}
         </div>
       </section>
 
       {/* ── CONTACT FORM ── */}
-      <section className="py-14 bg-gray-100">
+      {Object.keys(formContent).length > 0 && <section className="py-14 bg-gray-100">
         <div className="container-fluid">
           <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-8">
-            <h3 className="text-dark-navy font-bold text-xl mb-6">{formContent.heading || 'Get in Touch'}</h3>
+            {formContent.heading && <h3 className="text-dark-navy font-bold text-xl mb-6">{formContent.heading}</h3>}
             {submitted && (
               <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded text-green-700 text-sm">
-                {formContent.success_message || 'Thank you! Your message has been sent. We will get back to you shortly.'}
+                {formContent.success_message}
               </div>
             )}
             {submitError && (
@@ -172,7 +183,7 @@ const ContactUs = () => {
                   <input
                     type="text"
                     name="firstName"
-                    placeholder={formContent.first_name_label || 'First Name'}
+                    placeholder={formContent.first_name_label || ''}
                     value={formData.firstName}
                     onChange={handleChange}
                     required
@@ -181,7 +192,7 @@ const ContactUs = () => {
                   <input
                     type="text"
                     name="lastName"
-                    placeholder={formContent.last_name_label || 'Last Name'}
+                    placeholder={formContent.last_name_label || ''}
                     value={formData.lastName}
                     onChange={handleChange}
                     required
@@ -190,7 +201,7 @@ const ContactUs = () => {
                   <input
                     type="tel"
                     name="contact"
-                    placeholder={formContent.phone_label || 'Contact No.'}
+                    placeholder={formContent.phone_label || ''}
                     value={formData.contact}
                     onChange={handleChange}
                     required
@@ -202,7 +213,7 @@ const ContactUs = () => {
                   <input
                     type="email"
                     name="email"
-                    placeholder={formContent.email_label || 'E-mail'}
+                    placeholder={formContent.email_label || ''}
                     value={formData.email}
                     onChange={handleChange}
                     required
@@ -211,7 +222,7 @@ const ContactUs = () => {
                   <input
                     type="text"
                     name="city"
-                    placeholder={formContent.city_label || 'City'}
+                    placeholder={formContent.city_label || ''}
                     value={formData.city}
                     onChange={handleChange}
                     className={`w-full border rounded px-4 py-2.5 text-sm text-gray-700 focus:outline-none transition-colors ${formData.city.trim() ? 'border-green-500 bg-green-50' : 'border-gray-200 focus:border-primary'}`}
@@ -221,7 +232,7 @@ const ContactUs = () => {
                 <div>
                   <textarea
                     name="message"
-                    placeholder={formContent.message_label || 'My Message'}
+                    placeholder={formContent.message_label || ''}
                     rows={9}
                     value={formData.message}
                     onChange={handleChange}
@@ -263,7 +274,7 @@ const ContactUs = () => {
               </div>
               <div className="flex gap-3 mt-6">
                 <button type="submit" disabled={submitting} className="btn-primary px-8 disabled:opacity-60 disabled:cursor-not-allowed">
-                  {submitting ? 'Sending...' : (formContent.submit_label || 'Send')}
+                  {submitting ? 'Sending...' : formContent.submit_label}
                 </button>
                 <button
                   type="reset"
@@ -275,99 +286,66 @@ const ContactUs = () => {
                   }}
                   className="bg-dark-navy text-white px-8 py-2 text-sm font-semibold uppercase tracking-wider hover:bg-navy transition-colors"
                 >
-                  {formContent.reset_label || 'Reset'}
+                  {formContent.reset_label}
                 </button>
               </div>
             </form>
           </div>
         </div>
-      </section>
+      </section>}
 
       {/* ── MAP SECTION ── */}
-      <section className="py-10 bg-gray-100">
+      {offices.length > 0 && <section className="py-10 bg-gray-100">
         <div className="container-fluid">
           <div className="max-w-3xl mx-auto">
             {/* City Tabs */}
-            <div className="flex gap-3 items-center mb-4">
-              <button
-                onClick={() => setActiveMap('surat')}
-                className={`text-sm font-semibold uppercase tracking-wider pb-1 border-b-2 transition-all duration-200 ${activeMap === 'surat' ? 'text-primary border-primary' : 'text-gray-500 border-transparent hover:text-primary'}`}
-              >
-                SURAT
-              </button>
-              <span className="text-gray-300">|</span>
-              <button
-                onClick={() => setActiveMap('jaipur')}
-                className={`text-sm font-semibold uppercase tracking-wider pb-1 border-b-2 transition-all duration-200 ${activeMap === 'jaipur' ? 'text-primary border-primary' : 'text-gray-500 border-transparent hover:text-primary'}`}
-              >
-                JAIPUR
-              </button>
-            </div>
+            {offices.length > 1 && <div className="flex gap-3 items-center mb-4">
+              {offices.map((office, index) => <React.Fragment key={office.id}>
+                {index > 0 && <span className="text-gray-300">|</span>}
+                <button onClick={() => setActiveMap(office.id)} className={`text-sm font-semibold uppercase tracking-wider pb-1 border-b-2 transition-all duration-200 ${activeOffice?.id === office.id ? 'text-primary border-primary' : 'text-gray-500 border-transparent hover:text-primary'}`}>{office.title}</button>
+              </React.Fragment>)}
+            </div>}
 
             {/* Single map based on active tab */}
-            <div ref={mapSectionRef} className="rounded overflow-hidden border-2 border-primary">
-              {mapReady && activeMap === 'surat' ? (
-                <iframe
-                  key="surat"
-                  title="KGK Academy Surat"
-                  src={offices.surat.mapEmbed}
-                  className="w-full h-64 md:h-80"
-                  style={{ border: 0 }}
-                  allowFullScreen=""
-                  loading="lazy"
-                />
-              ) : mapReady ? (
-                <iframe
-                  key="jaipur"
-                  title="KGK Academy Jaipur"
-                  src={offices.jaipur.mapEmbed}
-                  className="w-full h-64 md:h-80"
-                  style={{ border: 0 }}
-                  allowFullScreen=""
-                  loading="lazy"
-                />
-              ) : (
-                <div className="h-64 md:h-80 bg-gray-100 flex items-center justify-center text-sm text-gray-500">
-                  Map loads when you reach this section
-                </div>
-              )}
-            </div>
+            {activeOffice?.mapEmbed && <div ref={mapSectionRef} className="rounded overflow-hidden border-2 border-primary">
+              {mapReady ? <iframe key={activeOffice.id} title={activeOffice.title || ''} src={activeOffice.mapEmbed} className="w-full h-64 md:h-80" style={{ border: 0 }} allowFullScreen="" loading="lazy" /> : <div className="h-64 md:h-80 bg-gray-100" />}
+            </div>}
 
             {/* Office Info */}
             <div className="mt-4 p-4 bg-white rounded border border-gray-200">
               <div className="grid md:grid-cols-3 gap-4 text-sm text-gray-600">
-                <div className="flex items-start gap-2">
+                {activeOffice.address && <div className="flex items-start gap-2">
                   <FaMapMarkerAlt className="text-primary mt-0.5 flex-shrink-0" size={14} />
-                  <p>{offices[activeMap].address}</p>
-                </div>
-                <div className="flex items-center gap-2">
+                  <p>{activeOffice.address}</p>
+                </div>}
+                {activeOffice.phone && <div className="flex items-center gap-2">
                   <FaPhone className="text-primary flex-shrink-0" size={13} />
-                  <a href={`tel:${offices[activeMap].phone}`} className="hover:text-primary transition-colors">{offices[activeMap].phone}</a>
-                </div>
-                <div className="flex items-center gap-2">
+                  <a href={`tel:${activeOffice.phone}`} className="hover:text-primary transition-colors">{activeOffice.phone}</a>
+                </div>}
+                {activeOffice.email && <div className="flex items-center gap-2">
                   <FaEnvelope className="text-primary flex-shrink-0" size={13} />
-                  <a href={`mailto:${offices[activeMap].email}`} className="hover:text-primary transition-colors">{offices[activeMap].email}</a>
-                </div>
+                  <a href={`mailto:${activeOffice.email}`} className="hover:text-primary transition-colors">{activeOffice.email}</a>
+                </div>}
               </div>
             </div>
 
             {/* Quick Links */}
-            <div className="mt-6 flex flex-wrap gap-3 justify-center">
-              <span className="text-sm font-semibold text-dark-navy self-center">{quickLinksContent.heading || 'Quick Links'}</span>
-              {quickLinks.map(({ icon: Icon, label, href }) => (
+            {quickLinks.length > 0 && <div className="mt-6 flex flex-wrap gap-3 justify-center">
+              {quickLinksContent.heading && <span className="text-sm font-semibold text-dark-navy self-center">{quickLinksContent.heading}</span>}
+              {quickLinks.map(({ Icon, label, href, id }) => (
                 <a
-                  key={label}
+                  key={id}
                   href={href}
                   className="flex items-center gap-2 px-5 py-2 bg-primary text-white text-xs font-semibold uppercase tracking-wide rounded hover:bg-opacity-90 transition-all duration-200"
                 >
-                  <Icon size={13} />
+                  {Icon && <Icon size={13} />}
                   {label}
                 </a>
               ))}
-            </div>
+            </div>}
           </div>
         </div>
-      </section>
+      </section>}
     </MainLayout>
   );
 };

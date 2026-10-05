@@ -157,20 +157,6 @@ const BlogDetail = () => {
 
             {/* Right: Sidebar */}
             <div className="mt-12 lg:mt-0">
-              {/* CTA Card */}
-              <div className="bg-dark-navy rounded-xl p-6 mb-6">
-                <h4 className="text-white font-bold text-base mb-2">Interested in a Course?</h4>
-                <p className="text-white/60 text-sm mb-4">
-                  Turn your interest in gems and diamonds into a professional career.
-                </p>
-                <Link to="/courses" className="btn-primary w-full text-center block mb-3">
-                  View Courses
-                </Link>
-                <Link to="/contact-us" className="block w-full text-center py-2 text-sm font-semibold text-white/70 border border-white/20 rounded hover:border-white/50 transition-colors duration-200">
-                  Enquire Now
-                </Link>
-              </div>
-
               {/* Related Articles */}
               {sidebarBlogs.length > 0 && (
                 <div>

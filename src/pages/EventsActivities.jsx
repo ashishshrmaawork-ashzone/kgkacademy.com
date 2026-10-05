@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import MainLayout from '@/layout/MainLayout';
 import usePageMeta from '@/hooks/usePageMeta';
-import usePageContent from '@/hooks/usePageContent';
+import useCmsPage from '@/hooks/useCmsPage';
 import { FaCalendarAlt, FaMapMarkerAlt } from 'react-icons/fa';
 import useApiData from '@/hooks/useApiData';
 import { getEvents, mediaUrl, unwrapData } from '@/services/api';
@@ -16,7 +16,7 @@ const categoryColors = {
 };
 
 const EventsActivities = () => {
-  const content = usePageContent('events-activities');
+  const { page, content } = useCmsPage('events-activities');
   const listing = content.event_listing || {};
   const initialItems = Number(listing.initial_items) || 0;
   const loadMoreCount = Number(listing.load_more_count) || 0;
@@ -41,7 +41,7 @@ const EventsActivities = () => {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
-  usePageMeta('Events & Activities', "Stay updated with KGK Academy's latest events, workshops, industry visits, and student activities in Surat and Jaipur.");
+  usePageMeta(page?.meta_title, page?.meta_description);
 
   return (
     <MainLayout>

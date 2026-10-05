@@ -19,6 +19,9 @@ export default function MomentsSection() {
       url: events[`event_${number}_url`],
     }))
     .filter(event => event.title);
+
+  if (!events.heading && !moments.length) return null;
+
   return (
     <section className="py-10 md:py-20" style={{ backgroundColor: '#08254f' }}>
       <div className="container-fluid">
@@ -27,11 +30,11 @@ export default function MomentsSection() {
             {events.heading}
           </h2>
         )}
-        <Swiper
+        {moments.length > 0 && <Swiper
           modules={[Autoplay, Pagination]}
           slidesPerView={1}
           spaceBetween={12}
-          loop={true}
+          loop={moments.length > 1}
           autoplay={{ delay: 3000, disableOnInteraction: false }}
           pagination={{ clickable: true }}
           breakpoints={{
@@ -42,7 +45,7 @@ export default function MomentsSection() {
         >
           {moments.map((m, i) => (
             <SwiperSlide key={i}>
-              <Link to={m.url || '/events-activities'} className="block">
+              <Link to={m.url || '#'} className="block" onClick={event => { if (!m.url) event.preventDefault(); }}>
                 <div className="relative overflow-hidden group cursor-pointer h-[300px] md:h-[440px]">
                   {m.image && (
                     <img src={mediaUrl(m.image)} alt={m.title}
@@ -63,7 +66,7 @@ export default function MomentsSection() {
               </Link>
             </SwiperSlide>
           ))}
-        </Swiper>
+        </Swiper>}
       </div>
     </section>
   );
